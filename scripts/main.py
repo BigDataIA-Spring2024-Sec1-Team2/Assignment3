@@ -1,8 +1,8 @@
 from models.database import create_tables, Session
-from scripts.topic import Topic
-from scripts.content import Content
-from scripts.metadata import Metadata
-from scripts.url import URL
+from models.topic import Topic
+from models.content import Content
+from models.metadata import Metadata
+from models.url import URL
 
 # Create tables
 create_tables()
