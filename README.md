@@ -36,8 +36,27 @@ Use the provided schema for Part 1 and create schemas for Part 2. For Part 2 (PD
 You are expected to do data and schema validation using these objects using Pydantic 2 (See the tutorials and attend the TA lab )and create “clean” csv files
 Build 5+5 test cases using Pytest for each of the three classes to show how your validation would succeed/fail (5 pass and 5 fail)
 You can use the Grobid data loader and Url data loader classes as starter code or the second example on Grobid Data classes to start with.
+Part 2 using DBT.
 
-Part 2(Airflow) will be shared next week.
+Your team is reviewing the architecture of Part 1 and think using DBT with Snowflake to run transformation workflows.
+
+Review https://docs.getdbt.com/docs/introductionLinks to an external site. to understand  DBT
+
+Your plan is to redo the tutorial: https://docs.getdbt.com/guides/snowflake?step=7Links to an external site. but with the “clean csv” created in Part 1
+
+Requirements
+
+Load the clean data into Snowflake
+You intend to create a summary table with the following schema using DBT.
+Level, Topic, Year, Number of articles, Min Length (Summary), Max Length (Summary), Min Length (Learning outcomes), Max Length (Learning outcomes)
+You are free to build a model in anyway you want
+Materialize it to a new table
+Write tests to validate the new columns
+Document your model
+Commit and Deploy the model
+Note: Review https://docs.getdbt.com/docs/dbt-cloud-environmentsLinks to an external site. for deployment
+Create a Test and Production Environment. (Note: Your Snowflake should also have a corresponding Test and Production db/tables.
+What considerations would you have for a test and Production environment? 
 
 ## Features
 
