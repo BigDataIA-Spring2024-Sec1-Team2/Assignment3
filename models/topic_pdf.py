@@ -1,13 +1,11 @@
-import itertools
+from itertools import count
+from pydantic.dataclasses import dataclass
+from pydantic import Field
 
+@dataclass
 class TopicPDF:
-    id_generator = itertools.count(1)
+    id: int = Field(default_factory=count(1).__next__)
+    level: str 
+    topic: str
 
-    def __init__(self, pdf_id: int, topic: str):
-        self.id = next(self.id_generator)
-        self.pdf_id = pdf_id
-        self.topic = topic
-
-    def __str__(self):
-        return f"ID: {self.id}\nTopic: {self.topic}\PDF id: {self.pdf_id}\n---"
 

@@ -4,6 +4,8 @@ import requests
 from dotenv import load_dotenv
 from grobid_client.grobid_client import GrobidClient
 from bs4 import BeautifulSoup
+from pydantic import TypeAdapter, ValidationError
+import csv
 
 ## config
 print("PYTHONPATH = ",sys.path)
@@ -29,8 +31,8 @@ def load_env():
     
     return grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region
 
-grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region = load_env()
-
+# load env
+grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region = load_env() 
 
 def extract_grobid():
     print("Changing current working directory to:")
@@ -50,6 +52,9 @@ def extract_grobid():
         os.chdir("../")
         print("Changing current working directory back to:")
         print(os.getcwd())
+
+def dump_to_s3():
+    pass
 
 def parse_xml_content(level, xml_file_path):
 
@@ -86,18 +91,23 @@ def parse_xml_content(level, xml_file_path):
         
         # Extract content from 'p' elements
         content = ' '.join(p.text for p in div.find_all('p'))
-        if not content:
-            # if there no content, then it is a topic
-            topic = TopicPDF(level, heading)
-            topic_list.append(topic)
+        try:
+            if not content:
+                # if there no content, then it is a topic
+                topic = TopicPDF(level, heading)
+                topic_model = TypeAdapter(TopicPDF).validate_python(topic)
+                topic_list.append(topic_model)
+                continue
+            # add heading and content to the list
+            cont = ContenPDF(topic_id=topic.id, heading=heading, content=content)
+            # validating the dataclass 
+            content_model = TypeAdapter(ContenPDF).validate_python(cont)
+            content_list.append(content_model)
+        except ValidationError as e:
+            print(e)
+            print("Skipping this content : ")
+            print(div.text)
             continue
-        # add heading and content to the list
-        cont = ContenPDF(topic.id, heading, content)
-        content_list.append(cont)
-        
-        # print("Heading:", heading)
-        # print("Content:", content)
-        # print("---")
     
     return topic_list,content_list
 
@@ -105,6 +115,7 @@ def parse_xml_content(level, xml_file_path):
 def parse_all_xml():
     # Iterate through all PDF files in the directory
     grobid_output_dir = output_dir+"grobid/"
+    topic_list,content_list = None, None
     for filename in os.listdir(grobid_output_dir):
         if filename.endswith(".xml"):
             xml_file_path = os.path.join(grobid_output_dir, filename)
@@ -116,10 +127,47 @@ def parse_all_xml():
             topic_list,content_list = parse_xml_content(level, xml_file_path)
             print(len(content_list))
             print(len(topic_list))
-            pypdf_name = "PyPDF_RR_"+year+"_"+level+"_combined.txt"
+    return topic_list,content_list
+
+def store_to_csv(object_list, file_dir, file_name):
+    # Ensure the list is not empty
+    if object_list:
+        # Get attribute names from the first object
+        fieldnames = list(vars(object_list[0]).keys())
+
+        # Check if the directory exists, create it if not
+        if not os.path.exists(file_dir):
+            print("Creating directory to store csv")
+            os.makedirs(file_dir)
+
+        csv_file_path = os.path.join(file_dir, file_name)
+
+        with open(csv_file_path, mode='w', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer.writeheader()
             
-extract_grobid()
-parse_all_xml()           
+            for object in object_list:
+                writer.writerow({field: getattr(object, field) for field in fieldnames})
+
+        print(f'Data has been written to {csv_file_path}.')
+    else:
+        print("List is empty, nothing to write to CSV.")
+
+
+def prase_grobid_driver(): 
+    
+    # extract grobid xml from PDF
+    extract_grobid()
+    # parse the xmls and validate objs using pydantic
+    topic_list,content_list = parse_all_xml()
+    # store the objects to csv
+    csv_output_dir = f'{output_dir}cleaned_csv/'
+    
+    store_to_csv(topic_list, csv_output_dir, "TopicPDF.csv")
+    store_to_csv(content_list, csv_output_dir, "ContentPDF.csv")
+
+
+prase_grobid_driver()         
 
 
     

@@ -1,14 +1,15 @@
-import itertools
+from itertools import count
+from pydantic.dataclasses import dataclass
+from pydantic import Field
 
+@dataclass
 class ContenPDF:
-    id_generator = itertools.count(1)
+    # id_generator: itertools.count(1) = itertools.count(1)
+    heading: str
+    content: str
+    topic_id: int = Field(gt=0)
+    
 
-    def __init__(self, topic_id: int, heading: str, content: str):
-        self.id = next(self.id_generator)
-        self.topic_id = topic_id
-        self.heading = heading
-        self.content = content
+    id: int = Field(default_factory=count(1).__next__)
 
-    def __str__(self):
-        return f"ID: {self.id}\nTopic_id: {self.topic_id}\nHeading: {self.heading}\nContent: {self.content}\n---"
-
+        
