@@ -7,6 +7,11 @@ import csv
 import os
 import re
 
+import sys
+sys.path.append('/Users/torch-it/Desktop/Class/Bigdata/ass3/ass3/2/Assignment3/')
+
+from models.urlClass import UrlClass
+
 
 def scrape_coveo_links(url):
     # Set up the WebDriver with the command line flag for Edge
@@ -97,7 +102,7 @@ def extract_information(url):
         soup = BeautifulSoup(response.content, 'html.parser')
         # Parse the content of the page with BeautifulSoup
         # Initialize variables to store extracted information
-        pdf_link = None
+        pdf_link = "https://missingpdf.com"
         topic_name = None
         year = None
         level = None
@@ -182,7 +187,7 @@ def write_to_csv(file_path, header, content):
         writer.writerow(content)
 
 def loadenv():
-    load_dotenv('../config/.env',override=True)
+    load_dotenv('./config/.env',override=True)
     csv_filename = os.getenv("CSV_CFA_WEB")
     folderpath = os.getenv("DIR_CFA_WEB")
     txt_filename = os.getenv("TXT_CFA_LINKS")
@@ -236,8 +241,7 @@ if __name__ == '__main__':
     # print(listUrl)
     info = []
     for url in listUrl:
-        info.append(create_url_object(url))
+        info.append(UrlClass(**create_url_object(url)))
     print(info)
-
 
 
