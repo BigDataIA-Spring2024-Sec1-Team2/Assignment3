@@ -1,4 +1,26 @@
-id,pdf_id,topic
+id,level,topic
+1,l2,Quantitative Methods
+2,l2,Economics
+3,l2,Financial Statement Analysis
+4,l2,Integration of Financial Statement Analysis Techniques
+5,l2,Corporate Issuers
+6,l2,Equity Valuation
+7,l2,Fixed Income
+8,l2,Derivatives
+9,l2,Alternative Investments
+10,l2,Portfolio Management
+11,l2,Ethical and Professional Standards
+12,l1,Quantitative Methods
+13,l1,Economics
+14,l1,Portfolio Management
+15,l1,Corporate Issuers
+16,l1,Financial Statement Analysis
+17,l1,Equity Investments
+18,l1,Fixed Income
+19,l1,Derivatives
+20,l1,Alternative Investments
+21,l1,Ethical and Professional Standards
+22,l3,Quantitative Methods
 23,l3,Portfolio Management
 24,l3,Derivatives
 25,l3,"Swaps, Forwards, and Futures Strategies"
