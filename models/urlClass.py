@@ -1,6 +1,7 @@
 from pydantic import BaseModel, HttpUrl, validator
 from typing import List
 
+
 class UrlClass(BaseModel):
     pdfLink: HttpUrl  # Validates that the link is a proper URL
     parentTopic: str
@@ -21,3 +22,23 @@ class UrlClass(BaseModel):
         return value
 
     # You can add more validators here as needed for other fields
+if __name__ == '__main__':
+    data = {
+    "pdfLink": "http://example.com/somefile.pdf",
+    "parentTopic": "Science",
+    "year": 2023,
+    "level": "Beginner",
+    "introduction": "This is an introduction.",
+    "learningOutcome": "You will learn Pydantic.",
+    "summary": "This is a summary.",
+    "categories": ["Education", "Programming"],
+    "topicName": "Pydantic Validation",
+    "url": "http://example.com"
+}
+    try:
+        url_instance = UrlClass(**data)
+        print("Validation successful!")
+        print(url_instance)
+    except Exception as e:
+        print(f"Validation error: {e}")
+
