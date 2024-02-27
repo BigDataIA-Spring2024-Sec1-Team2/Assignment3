@@ -1,6 +1,6 @@
 from pydantic import BaseModel, HttpUrl, validator
 from typing import List
-
+import csv
 
 class UrlClass(BaseModel):
     pdfLink: HttpUrl  # Validates that the link is a proper URL
@@ -21,6 +21,7 @@ class UrlClass(BaseModel):
             raise ValueError('Year must be between 1900 and 2099')
         return value
 
+          
     # You can add more validators here as needed for other fields
 if __name__ == '__main__':
     data = {
@@ -41,4 +42,6 @@ if __name__ == '__main__':
         print(url_instance)
     except Exception as e:
         print(f"Validation error: {e}")
+
+    
 

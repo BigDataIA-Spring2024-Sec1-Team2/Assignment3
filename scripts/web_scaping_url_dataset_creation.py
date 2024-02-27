@@ -11,7 +11,10 @@ import csv
 import os
 import re
 
+from typing import List
+
 import sys
+
 sys.path.append('/Users/torch-it/Desktop/Class/Bigdata/ass3/ass3/2/Assignment3/')
 
 from models.urlClass import UrlClass
@@ -222,6 +225,35 @@ def create_url_object(url):
     data['url'] = url
     return data
 
+def delete_csv_if_exists(filename):
+    # Check if the file exists
+    if os.path.exists(filename):
+        # Delete the file
+        os.remove(filename)
+        print(f"File '{filename}' has been deleted.")
+    else:
+        print(f"File '{filename}' does not exist, no need to delete.")
+
+    
+def write_url_objects_to_csv(url_objects: List[UrlClass], filename: str):
+    # Open the file in write mode
+    with open(filename, mode='w', newline='', encoding='utf-8') as file:
+        # Create a csv writer
+        writer = csv.writer(file)
+
+        # Write the header row
+        headers = ['pdfLink', 'parentTopic', 'year', 'level', 'introduction',
+                   'learningOutcome', 'summary', 'categories', 'topicName', 'url']
+        writer.writerow(headers)
+
+        # Write data rows
+        for row in url_objects:
+            # Convert UrlClass object to dictionary and handle list of categories
+            # row = obj.dict()
+            row['categories'] = ';'.join(row['categories'])  # Convert list to semicolon-separated string
+            # Write the row values in the order of headers
+            writer.writerow([row[header] for header in headers])
+
 if __name__ == '__main__':
 
     csv_filename, folderpath, txt_filename =loadenv()
@@ -239,16 +271,19 @@ if __name__ == '__main__':
         print(f"Error: The file '{file_path}' does not exist.")
     except Exception as e:
         print(f"An error occurred: {e}")
-
     listUrl = []
-
     while(count>=0):
         url = f"https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#first={count*100}&sort=%40refreadingcurriculumyear%20descending&numberOfResults=100"
         listUrl += scrape_coveo_links(url)
         count = count - 1 
     # print(listUrl)
-    info = []
-
     url_objects = process_urls(listUrl)
+
+    csv_path = folderpath+csv_filename
+    delete_csv_if_exists(csv_path)
+
+    write_url_objects_to_csv(url_objects,csv_path)
+
+
 
 
