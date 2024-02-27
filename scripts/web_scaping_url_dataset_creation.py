@@ -1,6 +1,10 @@
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
+
+import concurrent.futures
+from tqdm import tqdm 
+
 import requests
 import time
 import csv
@@ -194,17 +198,21 @@ def loadenv():
     print(csv_filename, folderpath, txt_filename)
     return csv_filename, folderpath, txt_filename
     
+def process_urls(urls):
+    # Create a list to hold the results.
+    url_objects = []
+    # Initialize the progress bar with the total number of URLs.
+    with tqdm(total=len(urls), desc="Processing URLs") as progress_bar:
+        # Use ThreadPoolExecutor for multithreading.
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            # Create a future for each URL.
+            futures = [executor.submit(create_url_object, url) for url in urls]
+            # As each future completes, update the progress bar and add the result to the list.
+            for future in concurrent.futures.as_completed(futures):
+                url_objects.append(future.result())
+                progress_bar.update(1)  # Update the progress bar by one step.
+    return url_objects
 
-# Define the path for the CSV file
-
-def delCSV(csv_file_path):
-    # Check if the CSV file exists
-    if os.path.exists(csv_file_path):
-        # If the file exists, remove it
-        os.remove(csv_file_path)
-        message = "CSV file removed successfully."
-    else:
-        message = "CSV file does not exist."
 def create_url_object(url):
     data = extract_information(url)
     # Using ** to unpack the dictionary directly
@@ -234,14 +242,13 @@ if __name__ == '__main__':
 
     listUrl = []
 
-    while(count>=2):
+    while(count>=0):
         url = f"https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#first={count*100}&sort=%40refreadingcurriculumyear%20descending&numberOfResults=100"
         listUrl += scrape_coveo_links(url)
         count = count - 1 
     # print(listUrl)
     info = []
-    for url in listUrl:
-        info.append(UrlClass(**create_url_object(url)))
-    print(info)
+
+    url_objects = process_urls(listUrl)
 
 
