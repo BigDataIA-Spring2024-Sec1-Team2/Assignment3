@@ -14,8 +14,10 @@ import re
 from typing import List
 
 import sys
+current_directory = os.getcwd()
 
-sys.path.append('/Users/torch-it/Desktop/Class/Bigdata/ass3/ass3/2/Assignment3/')
+# Get the parent directory
+sys.path.append(current_directory)
 
 from models.urlClass import UrlClass
 
