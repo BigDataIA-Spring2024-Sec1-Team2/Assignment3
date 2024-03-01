@@ -3,8 +3,7 @@ version: 2
 sources:
     - name: my_new_project
       description: This is a dbt project for DAMG 7245 Course
-      database: scraping_dev
-      # database: "{{ env_var('DBT_DATABASE') }}"
+      database: "{{ env_var('DBT_DATABASE') }}"
       schema: web_data
       tables:
           - name: urldata
