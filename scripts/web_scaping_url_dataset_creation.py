@@ -292,7 +292,7 @@ if __name__ == '__main__':
 
     # write_url_objects_to_csv(url_objects,csv_path)
     Utility.store_to_csv(url_objects,folderpath,csv_filename)
-    Utility.upload_text_files_to_s3_root(os.getcwd()+"/output_data")
+    # Utility.upload_text_files_to_s3_root(os.getcwd()+"/output_data")
 
 
 
