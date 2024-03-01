@@ -23,13 +23,19 @@ def download_files_from_s3(local_folder, s3_folder):
 
     # List objects in the specified S3 folder
     response = s3.list_objects_v2(Bucket=s3_bucket_name, Prefix=s3_folder)
-    print(response)
+    # print(response)
+    file_paths = []
 
     # Download each file to the local directory
     for obj in response.get('Contents')[1:]:
         key = obj['Key']
-        local_file_path = os.path.join(pdf_directory,local_folder, os.path.basename(key))
+        local_file_path = os.path.join(local_folder, os.path.basename(key))
 
         s3.download_file(s3_bucket_name, key, local_file_path)
         print(f"Downloaded: {key} to {local_file_path}")
+        path = f"https://{s3_bucket_name}.s3.amazonaws.com/{key}"
+        file_paths.append(path)
+
+    print(file_paths)
+    return file_paths
 

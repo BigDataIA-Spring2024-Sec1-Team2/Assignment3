@@ -39,28 +39,28 @@ class UrlClass(BaseModel):
     # Validation for the 'introduction' field to ensure it's not empty
     @validator('introduction')
     def introduction_must_not_be_empty(cls, value):
-        if not value.strip():
+        if not value:
             raise ValueError('Introduction must not be empty')
         return value
 
     # Validation for the 'learningOutcome' field to ensure it's not empty
     @validator('learningOutcome')
     def learning_outcome_must_not_be_empty(cls, value):
-        if not value.strip():
+        if not value:
             raise ValueError('Learning outcome must not be empty')
         return value
 
     # Validation for the 'summary' field to ensure it's not empty
     @validator('summary')
     def summary_must_not_be_empty(cls, value):
-        if not value.strip():
+        if not value:
             raise ValueError('Summary must not be empty')
         return value
 
     # Validation for the 'pdfLink' field to ensure it's not empty
     @validator('pdfLink')
     def pdf_link_must_not_be_empty(cls, value):
-        if not value.strip():
+        if not value:
             raise ValueError('PDF link must not be empty')
         return value
           

@@ -35,10 +35,8 @@ def load_env():
     
     return grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region
 
-# load env
-grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region = load_env() 
-
-def extract_grobid():
+# Function to extract grobid xml using grobid client
+def extract_grobid(output_dir):
     print("Changing current working directory to:")
     os.chdir("grobid_client_python")
     print(os.getcwd())
@@ -60,6 +58,7 @@ def extract_grobid():
 def dump_to_s3():
     pass
 
+# utility function to store the given list as csv to given file path
 def store_to_csv(object_list, file_dir, file_name):
     # Ensure the list is not empty
     if object_list:
@@ -85,18 +84,18 @@ def store_to_csv(object_list, file_dir, file_name):
     else:
         print("List is empty, nothing to write to CSV.")
 
-
+# function to parse individual grobid xml and create ContentPDF and TopicPDF objects
 def parse_xml_content(level, xml_file_path):
 
     content_list = []
     topic_list =[]
     cont = None
 
-    print(level[-1])
     title_topic = "Quantitative Methods"
     if level[-1] == 3 : title_topic = "Economics"
+    levell = 'Level I' if "1" in level else 'Level II' if "2" in level else 'Level III'
     
-    topic = TopicPDF(level=level,topic=title_topic )
+    topic = TopicPDF(level=levell,topic=title_topic )
     topic_model = TypeAdapter(TopicPDF).validate_python(topic)
     topic_list.append(topic_model)
 
@@ -134,7 +133,7 @@ def parse_xml_content(level, xml_file_path):
         try:
             if not content:
                 # if there no content, then it is a topic
-                topic = TopicPDF(level=level, topic=heading)
+                topic = TopicPDF(level=levell, topic=heading)
 
                 topic_model = TypeAdapter(TopicPDF).validate_python(topic)
                 topic_list.append(topic_model)
@@ -152,8 +151,8 @@ def parse_xml_content(level, xml_file_path):
     
     return topic_list, content_list, content_length
 
-
-def parse_all_xml():
+# function to parse all xml files in the local directory and create MetadataPDF class
+def parse_all_xml(s3_paths):
     # Iterate through all PDF files in the directory
     grobid_output_dir = output_dir+"grobid/"
     topic_list,content_list = [], []
@@ -168,38 +167,51 @@ def parse_all_xml():
 
             topics, contents, content_length = parse_xml_content(level, xml_file_path)
             # metadata
-            pdf_id = level[-1]
             # 2024-l1-topics-combined-2.grobid.tei.xml
             name = filename.split(".")[0]
+            levell = 'Level I' if "1" in level else 'Level II' if "2" in level else 'Level III'
             total_topics = len(topics)
             total_sub_topics = len(contents)
             
             topic_names = [top.topic for top in topics]
             sub_topics_names = [st.heading for st in contents]
-            metadata = MetadataPDF(pdf_id=pdf_id, name=name, level=level, year=year, total_topics=total_topics,
+            s3_path = [p for p in s3_paths if level in p]
+            print("s3 file path")
+            print(s3_path)
+
+            metadata = MetadataPDF(name=name, level=levell, year=year, total_topics=total_topics,
                                    topics=topic_names, total_sub_topics=total_sub_topics, 
                                    sub_topics=sub_topics_names,
-                                   content_length=content_length, s3_filepath="s3://cfa-pdf/cleaned_data/")
+                                   content_length=content_length, s3_filepath=s3_path[0])
             
-            metadata_list.append(metadata)
+            metadata_model = TypeAdapter(MetadataPDF).validate_python(metadata)            
+            metadata_list.append(metadata_model)
             topic_list.append(topics)
             content_list.append(contents)
             print(len(content_list))
             print(len(topic_list))
     return metadata_list, topic_list, content_list
 
+# driver function
+if __name__ == '__main__': 
 
-def prase_grobid_driver(): 
+    # load env
+    grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region = load_env() 
+
+    if not os.path.exists("output_data/"):
+        print("Creating directory to store output data")
+        os.makedirs("output_data/")
     
-    # if not os.path.exists("data/"):
-    #     print("Creating directory to store raw pdfs")
-    #     os.makedirs("data/")
+    if not os.path.exists("data/"):
+        print("Creating directory to store raw pdfs")
+        os.makedirs("data/")
+        
     # download the pdf files from s3
-    # download_files_from_s3("data/", "raw-pdfs")
+    s3_paths = download_files_from_s3("data/", "raw_pdfs")
     # extract grobid xml from PDF
-    extract_grobid()
+    extract_grobid(output_dir)
     # parse the xmls and validate objs using pydantic
-    metadata_list,topic_list,content_list = parse_all_xml()
+    metadata_list,topic_list,content_list = parse_all_xml(s3_paths)
     # store the objects to csv
     csv_output_dir = f'{output_dir}cleaned_csv/'
     store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
@@ -212,7 +224,7 @@ def prase_grobid_driver():
     store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
 
 
-prase_grobid_driver()         
+       
 
 
     

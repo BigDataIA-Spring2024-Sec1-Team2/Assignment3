@@ -61,14 +61,14 @@ extract_grobid()
 metadata_list,topic_list,content_list = parse_all_xml()
 # store the objects to csv
 csv_output_dir = f'{output_dir}cleaned_csv/'
-store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
+Utility.store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
 
 # flatten the lists before storing it to csv
 topic_flattened = [topic for row in topic_list for topic in row]
-store_to_csv(topic_flattened, csv_output_dir, "TopicPDF.csv")
+Utility.store_to_csv(topic_flattened, csv_output_dir, "TopicPDF.csv")
 
 content_flattened = [content for row in content_list for content in row]
-store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
+Utility.store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
 
 
 prase_grobid_driver()       
