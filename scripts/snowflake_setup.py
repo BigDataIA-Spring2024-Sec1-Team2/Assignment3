@@ -27,7 +27,6 @@ def loadenv():
 def connectionToSnow(path='../config/.env',connection_test=False):
     load_dotenv(path,override=True)
     user, password, _, account_identifier,_ = loadenv()
-    print(user, password,account_identifier)
     engine = create_engine(
         'snowflake://{user}:{password}@{account_identifier}/'.format(
             user=user,
@@ -54,7 +53,7 @@ def execute(connection,query):
     finally:
         print("Done")
 def setup(connection):
-    print('in setup) ')
+    print('.........................SETTING UP DATABASES, WAREHOUSE, SCHEMAS')
     query = "CREATE OR REPLACE WAREHOUSE {};".format(os.getenv("SNOWFLAKE_USER"))
     execute(connection,query)
 
@@ -74,7 +73,7 @@ def setup(connection):
 def createtables(connection,db,topic,content,metadata,urldata):
     schema = os.getenv("SNOWFLAKE_DBT_SCHEMA")
 
-    print(db,topic,content,metadata,urldata)
+    print("................CREATING DATATABLE IN SNOWFLAKE ")
     topicTable = """
     create or replace TABLE {}.{}.{} 
     (ID NUMBER(38,0),
@@ -109,7 +108,7 @@ def createtables(connection,db,topic,content,metadata,urldata):
 
     execute(connection,metadataTable)
     
-    urldata = """create or replace TABLE {}.{}.{} (\
+    urldata = """create or replace TABLE {}.{}.{} (
 	PDFLINK VARCHAR(16777216),
 	PARENTTOPIC VARCHAR(16777216),
 	YEAR NUMBER(38,0),
@@ -127,6 +126,7 @@ def createtables(connection,db,topic,content,metadata,urldata):
 
 
 def loadtable_s3(connection, db,urldata,metadata,content,topic):
+    print("................LOADING DATA FROM SNOWFLAKE TO S3")
     schema = os.getenv("SNOWFLAKE_DBT_SCHEMA")
     aws_access = os.getenv("access_key")
     aws_secret = os.getenv("secret_key")
@@ -145,7 +145,7 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         )
     ON_ERROR = continue; """.format(db,schema,urldata,aws_access,aws_secret)
 
-    print(urldataload)
+    # print(urldataload)
     execute(connection,urldataload)
 
     metadataload = """copy into {}.{}.{}
@@ -161,6 +161,7 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue; """.format(db,schema,metadata,aws_access,aws_secret)
+    # print(metadataload)
     execute(connection,metadataload)
    
     contentload = """
@@ -177,6 +178,7 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue; """.format(db,schema,content,aws_access,aws_secret)
+    # print(contentload)
     execute(connection,contentload)
 
     topicsload = """copy into {}.{}.{}
@@ -192,7 +194,9 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue;""".format(db,schema,topic,aws_access,aws_secret)
+    # print(topicsload)
     execute(connection,topicsload)
+
    
 
 
