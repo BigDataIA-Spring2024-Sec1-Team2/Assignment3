@@ -2,7 +2,10 @@ import os
 import snowflake.connector
 from typing import List
 from dotenv import load_dotenv
+import csv
+
 class Utility:
+
     def __init__(self) -> None:
         # read env file and set all variables
         # Example: Assuming you have environment variables in a file named '.env'
@@ -14,7 +17,7 @@ class Utility:
         self.snowflake_password = os.getenv('SNOWFLAKE_PASSWORD')
         self.snowflake_database = os.getenv('SNOWFLAKE_DATABASE')
         self.snowflake_schema = os.getenv('SNOWFLAKE_SCHEMA')
-
+    
     def setup_snowflake(self):
         # create snowflake data warehouse
         connection = snowflake.connector.connect(
@@ -80,6 +83,35 @@ class Utility:
     def s3_write(self):
         # Implementation to write to S3
         pass
+
+    @staticmethod
+    def store_to_csv(object_list, file_dir, file_name):
+    # Ensure the list is not empty
+        if object_list:
+            # Get attribute names from the first object
+            fieldnames = list(vars(object_list[0]).keys())
+            # fieldnames = [field.name for field in fields(Person)]
+
+            # Check if the directory exists, create it if not
+            if not os.path.exists(file_dir):
+                print("Creating directory to store csv")
+                os.makedirs(file_dir)
+
+            csv_file_path = os.path.join(file_dir, file_name)
+
+            with open(csv_file_path, mode='w', newline='') as csv_file:
+                writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+                writer.writeheader()
+
+                for object in object_list:
+                    if object:
+                        writer.writerow({field: getattr(object, field) for field in fieldnames})
+
+            print(f'Data has been written to {csv_file_path}.')
+        else:
+            print("List is empty, nothing to write to CSV.")
+
+
 
     def s3_read(self):
         # Implementation to read from S3

@@ -15,10 +15,10 @@ from typing import List
 
 import sys
 current_directory = os.getcwd()
-
-# Get the parent directory
 sys.path.append(current_directory)
 
+
+from utility import Utility
 from models.urlClass import UrlClass
 
 
@@ -119,6 +119,9 @@ def extract_information(url):
         text_final = None
         parent_topic = None
 
+        # failed one to the new csv
+        # passed to the original csv 
+
         # Extract the PDF download link
         ## PDF link extraction
         for a_tag in soup.find_all('a'):
@@ -200,7 +203,6 @@ def loadenv():
     csv_filename = os.getenv("CSV_CFA_WEB")
     folderpath = os.getenv("DIR_CFA_WEB")
     txt_filename = os.getenv("TXT_CFA_LINKS")
-    print(csv_filename, folderpath, txt_filename)
     return csv_filename, folderpath, txt_filename
     
 def process_urls(urls):
@@ -219,14 +221,18 @@ def process_urls(urls):
     return url_objects
 
 def create_url_object(url):
-    data = extract_information(url)
-    # Using ** to unpack the dictionary directly
-    data_keys = ['pdfLink', 'parentTopic', 'year', 'level', 'introduction', 
-                 'learningOutcome', 'summary', 'categories', 'topicName']
-    data = dict(zip(data_keys, data))
-    data['url'] = url
-    return data
-
+    try:
+        data = extract_information(url)
+        # Using ** to unpack the dictionary directly
+        data_keys = ['pdfLink', 'parentTopic', 'year', 'level', 'introduction', 
+                    'learningOutcome', 'summary', 'categories', 'topicName']
+        data = dict(zip(data_keys, data))
+        data['url'] = url
+        url_instance = UrlClass(**data)
+        return url_instance
+    except Exception as e :
+        print('error for '+ str(url) +'url: '+ str(e))
+        
 def delete_csv_if_exists(filename):
     # Check if the file exists
     if os.path.exists(filename):
@@ -284,7 +290,8 @@ if __name__ == '__main__':
     csv_path = folderpath+csv_filename
     delete_csv_if_exists(csv_path)
 
-    write_url_objects_to_csv(url_objects,csv_path)
+    # write_url_objects_to_csv(url_objects,csv_path)
+    Utility.store_to_csv(url_objects,folderpath,csv_filename)
 
 
 
