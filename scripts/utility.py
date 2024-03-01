@@ -184,6 +184,54 @@ class Utility:
     def snowflake_read(self):
         # Implementation to read from Snowflake
         pass
+    @staticmethod
+    def envForS3():
+        load_dotenv('../config/.env',override=True)
+        local_path = os.getenv("local_path")
+        s3_bucket_name = os.getenv("s3_bucket_name")
+        s3_folder = os.getenv("s3_pypdf")
+        access_key = os.getenv("access_key")
+        secret_key = os.getenv("secret_key")
+        region = os.getenv("region")
+        return local_path,s3_bucket_name,s3_folder,access_key,secret_key,region
+    
+    @staticmethod
+    def upload_text_files_to_s3_folder(local_path, bucket_name, s3_folder, access_key, secret_key, region):
+    # Create an S3 client
+        s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name = region)
+
+        # Iterate through all files in the local directory
+        for filename in os.listdir(local_path):
+            if filename.endswith(".csv"):
+                local_file_path = os.path.join(local_path, filename)
+                s3_object_key = f"{s3_folder}/{filename}"
+
+                # Check if the file already exists in S3
+                try:
+                    s3.head_object(Bucket=bucket_name, Key=s3_object_key)
+                    print(f"File {filename} already exists in S3. Overwriting...")
+                except Exception as e:
+                    # If the file doesn't exist, upload it
+                    try:
+                        s3.upload_file(local_file_path, bucket_name, s3_object_key)
+                        print(f"File {filename} uploaded successfully to S3: s3://{bucket_name}/{s3_object_key}")
+                    except Exception as upload_error:
+                        print(f"Error uploading file {filename} to S3: {upload_error}")
+            elif filename == "metadata_output.csv":
+                local_file_path = os.path.join(local_path, filename)
+                s3_object_key = f"{s3_folder}/{filename}"
+
+                # Check if the file already exists in S3
+                try:
+                    s3.head_object(Bucket=bucket_name, Key=s3_object_key)
+                    print(f"File {filename} already exists in S3. Overwriting...")
+                except Exception as e:
+                    # If the file doesn't exist, upload it
+                    try:
+                        s3.upload_file(local_file_path, bucket_name, s3_object_key)
+                        print(f"File {filename} uploaded successfully to S3: s3://{bucket_name}/{s3_object_key}")
+                    except Exception as upload_error:
+                        print(f"Error uploading file {filename} to S3: {upload_error}")
 
 # Example usage:
 if __name__ == "__main__":
@@ -191,9 +239,14 @@ if __name__ == "__main__":
     utility.setup_snowflake()
 
     # Example data to write to Snowflake
-    data_to_write = [
-        {'author': 'John Doe', 'lang': 'English', 's3FilePath': 's3://your-bucket/file.pdf', 'fileSize': 1024},
-        {'author': 'Jane Smith', 'lang': 'Spanish', 's3FilePath': 's3://your-bucket/file2.pdf', 'fileSize': 2048}
-    ]
+    # data_to_write = [
+    #     {'author': 'John Doe', 'lang': 'English', 's3FilePath': 's3://your-bucket/file.pdf', 'fileSize': 1024},
+    #     {'author': 'Jane Smith', 'lang': 'Spanish', 's3FilePath': 's3://your-bucket/file2.pdf', 'fileSize': 2048}
+    # ]
 
-    utility.snowflake_write(data_to_write)
+    local_path, s3_bucket_name, s3_folder, access_key, secret_key, region = Utility.envForS3()
+
+# Upload only new text files or overwrite existing ones in the specified S3 folder
+    Utility.upload_text_files_to_s3_folder(local_path, s3_bucket_name, s3_folder, access_key, secret_key, region)
+
+    # utility.upload_text_files_to_s3_root(data_to_write)
