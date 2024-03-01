@@ -280,7 +280,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"An error occurred: {e}")
     listUrl = []
-    while(count>=0):
+    while(count>=2):
         url = f"https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#first={count*100}&sort=%40refreadingcurriculumyear%20descending&numberOfResults=100"
         listUrl += scrape_coveo_links(url)
         count = count - 1 
@@ -292,6 +292,7 @@ if __name__ == '__main__':
 
     # write_url_objects_to_csv(url_objects,csv_path)
     Utility.store_to_csv(url_objects,folderpath,csv_filename)
+    Utility.upload_text_files_to_s3_root(os.getcwd()+"/output_data")
 
 
 

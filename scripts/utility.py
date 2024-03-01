@@ -3,6 +3,7 @@ import snowflake.connector
 from typing import List
 from dotenv import load_dotenv
 import csv
+import boto3
 
 class Utility:
 
@@ -79,11 +80,49 @@ class Utility:
             """)
         finally:
             connection.close()
+    @staticmethod
+    def upload_text_files_to_s3_root(local_path):
+    # Create an S3 client
+        def loadenv():
+            s3_bucket_name = os.getenv("s3_bucket_name")
+            s3_pypdf = os.getenv("s3_pypdf")
+            s3_grobid = os.getenv("s3_grobid")
+            access_key = os.getenv("access_key")
+            secret_key = os.getenv("secret_key")
+            region = os.getenv("region")
+            return "s3://"+ s3_bucket_name, s3_pypdf, s3_grobid, access_key, secret_key, region
+        s3_bucket_name, s3_pypdf, s3_grobid, access_key, secret_key, region = loadenv()
+        s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name = region)
 
-    def s3_write(self):
-        # Implementation to write to S3
-        pass
+        # List all files in the local path
+        local_files = os.listdir(local_path)
 
+        for file_name in local_files:
+            if file_name == '224_links.txt':  # Upload only text files, adjust the condition based on your file types
+                local_file_path = os.path.join(local_path, file_name)
+
+                # Specify the S3 key (file path within the bucket)
+                s3_key = file_name  # This will upload directly to the root of the S3 bucket
+
+                # Upload the file to S3
+                try:
+                    s3.upload_file(local_file_path, s3_bucket_name, s3_key)
+                    print(f"Successfully uploaded {file_name} to S3 bucket {s3_bucket_name}")
+                except Exception as e:
+                    print(f"Error uploading {file_name} to S3: {e}")
+            elif str(file_name).endswith('.csv'):  # Upload only text files, adjust the condition based on your file types
+                print(file_name)
+                local_file_path = os.path.join(local_path, file_name)
+
+                # Specify the S3 key (file path within the bucket)
+                s3_key = file_name  # This will upload directly to the root of the S3 bucket
+
+                # Upload the file to S3
+                try:
+                    s3.upload_file(local_file_path, s3_bucket_name, s3_key)
+                    print(f"Successfully uploaded {file_name} to S3 bucket {s3_bucket_name}")
+                except Exception as e:
+                    print(f"Error uploading {file_name} to S3: {e}")
     @staticmethod
     def store_to_csv(object_list, file_dir, file_name):
     # Ensure the list is not empty
