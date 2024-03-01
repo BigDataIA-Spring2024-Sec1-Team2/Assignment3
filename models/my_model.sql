@@ -1,3 +1,10 @@
-select pdf_id, name 
+SELECT DISTINCT YEAR , LEVEL , PARENTTOPIC , COUNT(TOPICNAME) AS "NUMBER OF ARTICLES",
+        MIN(LEN(SUMMARY))  AS "MIN_SUMMARY", MAX(LEN(SUMMARY)) AS "MAX_SUMMARY", 
+        MIN(LEN(LEARNINGOUTCOME)) AS "MIN_LO", MAX(LEN(LEARNINGOUTCOME)) AS "MAX_LO"
 
-from {{ source('my_new_project', 'metadata_pdf') }}
+FROM {{ source('my_new_project', 'urldata') }}
+WHERE YEAR IS NOT NULl AND LEVEL IS NOT NULL AND NOT (SUMMARY = 'Summary section is missing.') AND NOT (LEARNINGOUTCOME = 'Learning Outcomes section is missing.')
+GROUP BY YEAR, LEVEL, PARENTTOPIC
+ORDER BY YEAR
+
+

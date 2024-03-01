@@ -2,10 +2,13 @@ version: 2
 
 models:
   - name: my_model
-    description: Model representing metadata
+    description: Model representing final data
     columns:
-      - name: pdf_id
-        description: Primary key for my_model
+      - name: YEAR
+        description: year of cfa article
         tests:
-          - unique
+          - not_null
+      - name: LEVEL
+        description: level of cfa article
+        tests:
           - not_null
