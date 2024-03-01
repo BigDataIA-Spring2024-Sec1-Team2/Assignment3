@@ -1,0 +1,11 @@
+version: 2
+
+models:
+  - name: my_model
+    description: Model representing metadata
+    columns:
+      - name: pdf_id
+        description: Primary key for my_model
+        tests:
+          - unique
+          - not_null

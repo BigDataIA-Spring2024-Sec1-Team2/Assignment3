@@ -1,0 +1,12 @@
+version: 2
+
+sources:
+    - name: my_new_project
+      description: This is a dbt project for DAMG 7245 Course
+      database: DAMG_7245_CFA_DB
+      schema: public
+      tables:
+          - name: metadata_pdf
+            description: metadta for every pdf
+          # - name: orders
+          #   description: One record per order. Includes cancelled and deleted orders.
