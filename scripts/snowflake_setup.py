@@ -81,6 +81,7 @@ def createtables(connection,db,topic,content,metadata,urldata):
     LEVEL VARCHAR(16777216),
     TOPIC VARCHAR(16777216));""".format(db,schema,topic)
 
+
     execute(connection,topicTable)
 
     contentTable = """
@@ -108,8 +109,7 @@ def createtables(connection,db,topic,content,metadata,urldata):
 
     execute(connection,metadataTable)
     
-    urldata = """create or replace TABLE {}.{}.{} (
-	ID NUMBER(38,0),
+    urldata = """create or replace TABLE {}.{}.{} (\
 	PDFLINK VARCHAR(16777216),
 	PARENTTOPIC VARCHAR(16777216),
 	YEAR NUMBER(38,0),
@@ -127,8 +127,6 @@ def createtables(connection,db,topic,content,metadata,urldata):
 
 
 def loadtable_s3(connection, db,urldata,metadata,content,topic):
-
-    print(db,topic,content,metadata,urldata)
     schema = os.getenv("SNOWFLAKE_DBT_SCHEMA")
     aws_access = os.getenv("access_key")
     aws_secret = os.getenv("secret_key")
@@ -146,6 +144,8 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue; """.format(db,schema,urldata,aws_access,aws_secret)
+
+    print(urldataload)
     execute(connection,urldataload)
 
     metadataload = """copy into {}.{}.{}
@@ -161,8 +161,6 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue; """.format(db,schema,metadata,aws_access,aws_secret)
-
-
     execute(connection,metadataload)
    
     contentload = """
@@ -179,8 +177,6 @@ def loadtable_s3(connection, db,urldata,metadata,content,topic):
         FIELD_OPTIONALLY_ENCLOSED_BY='"'
         )
     ON_ERROR = continue; """.format(db,schema,content,aws_access,aws_secret)
-   
-
     execute(connection,contentload)
 
     topicsload = """copy into {}.{}.{}

@@ -280,7 +280,7 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"An error occurred: {e}")
     listUrl = []
-    while(count>=2):
+    while(count>=0):
         url = f"https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#first={count*100}&sort=%40refreadingcurriculumyear%20descending&numberOfResults=100"
         listUrl += scrape_coveo_links(url)
         count = count - 1 
