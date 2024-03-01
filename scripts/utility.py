@@ -181,23 +181,21 @@ class Utility:
         finally:
             connection.close()
 
-    def snowflake_read(self):
-        # Implementation to read from Snowflake
-        pass
+   
     @staticmethod
     def envForS3():
         load_dotenv('../config/.env',override=True)
-        local_path = os.getenv("local_path")
-        s3_bucket_name = os.getenv("s3_bucket_name")
-        s3_folder = os.getenv("s3_pypdf")
-        access_key = os.getenv("access_key")
-        secret_key = os.getenv("secret_key")
-        region = os.getenv("region")
+        local_path = os.getenv("LOCAL_PATH")
+        s3_bucket_name = os.getenv("S3_BUCKET_NAME")
+        s3_folder = os.getenv("S3_FOLDER_NAME")
+        access_key = os.getenv("S3_ACCESS_KEY")
+        secret_key = os.getenv("S3_SECRET_KEY")
+        region = os.getenv("S3_REGION")
         return local_path,s3_bucket_name,s3_folder,access_key,secret_key,region
     
     @staticmethod
     def upload_text_files_to_s3_folder(local_path, bucket_name, s3_folder, access_key, secret_key, region):
-    # Create an S3 client
+        # Create an S3 client
         s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name = region)
 
         # Iterate through all files in the local directory
@@ -237,12 +235,6 @@ class Utility:
 if __name__ == "__main__":
     utility = Utility()
     utility.setup_snowflake()
-
-    # Example data to write to Snowflake
-    # data_to_write = [
-    #     {'author': 'John Doe', 'lang': 'English', 's3FilePath': 's3://your-bucket/file.pdf', 'fileSize': 1024},
-    #     {'author': 'Jane Smith', 'lang': 'Spanish', 's3FilePath': 's3://your-bucket/file2.pdf', 'fileSize': 2048}
-    # ]
 
     local_path, s3_bucket_name, s3_folder, access_key, secret_key, region = Utility.envForS3()
 

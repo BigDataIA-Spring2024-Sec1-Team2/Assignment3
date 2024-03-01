@@ -23,8 +23,11 @@ from models.urlClass import UrlClass
 from web_scaping_url_dataset_creation import * 
 
 from web_scaping_url_dataset_creation import loadenv as web_scaping_loadenv
-# from parse_grobid_xml import * 
+from parse_grobid_xml import perform_grobid_extraction
 from snowflake_setup import * 
+
+
+print("--------------------------- PART 1: WEB SCRAPING CFA WEBSITES ---------------------------")
 
 csv_filename, folderpath, txt_filename =web_scaping_loadenv()
 count = 2
@@ -46,7 +49,7 @@ while(count>=0):
     url = f"https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#first={count*100}&sort=%40refreadingcurriculumyear%20descending&numberOfResults=100"
     listUrl += scrape_coveo_links(url)
     count = count - 1 
-# print(listUrl)
+
 url_objects = process_urls(listUrl)
 
 csv_path = folderpath+csv_filename
@@ -55,34 +58,27 @@ delete_csv_if_exists(csv_path)
 # write_url_objects_to_csv(url_objects,csv_path)
 Utility.store_to_csv(url_objects,folderpath,csv_filename)
 
-'''uncomment this in Sayal's system
-extract_grobid()
-# parse the xmls and validate objs using pydantic
-metadata_list,topic_list,content_list = parse_all_xml()
-# store the objects to csv
-csv_output_dir = f'{output_dir}cleaned_csv/'
-Utility.store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
+## GROBID
+print("--------------------------- PART 2: GROBID EXTRACTION ---------------------------")
 
-# flatten the lists before storing it to csv
-topic_flattened = [topic for row in topic_list for topic in row]
-Utility.store_to_csv(topic_flattened, csv_output_dir, "TopicPDF.csv")
-
-content_flattened = [content for row in content_list for content in row]
-Utility.store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
+perform_grobid_extraction()
 
 
-prase_grobid_driver()       
-'''
+
 local_path, s3_bucket_name, s3_folder, access_key, secret_key, region = Utility.envForS3()
+print(local_path, s3_bucket_name, s3_folder, access_key, secret_key, region)
 
-print(".............PPUSHING GENERATED FILE TO S3")
+print("--------------------------- PART 3: PUSHING CLEANED CSV FILES TO S3 ---------------------------")
 # Upload only new text files or overwrite existing ones in the specified S3 folder
 Utility.upload_text_files_to_s3_folder(local_path, s3_bucket_name, s3_folder, access_key, secret_key, region)
 
-print(".............TESTING SNOWFLAKE CONNECTION")
+
+print("--------------------------- PART 4: CREATING SNOWFLAKE SCHEMA ---------------------------")
+print("\n")
+print(".............Testing Snnowflake connection")
 connectionToSnow(connection_test=False)
 
-print(".............STARTING SNOWFLAKE CONNECTION")
+print(".............Starting Snnowflake connection")
 connection = connectionToSnow()
 setup(connection)
 
@@ -94,7 +90,8 @@ metadata_table = os.getenv("SNOWFLAKE_DBT_META_TABLE")
 urldata_table = os.getenv("SNOWFLAKE_DBT_URLDATA_TABLE")
 
 
-print("creating tables")
+print(".............Creating Snnowflake Tables")
+
 createtables(connection,db_prod, topic_table, content_table, metadata_table, urldata_table)
 createtables(connection,db_dev, topic_table, content_table, metadata_table, urldata_table)
 

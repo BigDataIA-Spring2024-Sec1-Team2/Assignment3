@@ -46,7 +46,7 @@ class TestUrlClass(TestCase):
 
     def test_positive_valid_pdf_link(self):
         urlTestData = UrlClass(**self.data)
-        self.assertTrue(urlTestData.pdfLink.startswith("http:"))
+        self.assertTrue(str(urlTestData.pdfLink).startswith("http:"))
 
     def test_positive_valid_categories(self):
         urlTestData = UrlClass(**self.data)

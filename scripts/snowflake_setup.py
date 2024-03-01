@@ -85,10 +85,11 @@ def createtables(connection,db,topic,content,metadata,urldata):
 
     contentTable = """
     create or replace TABLE {}.{}.{} (
-	HEADING VARCHAR(16777216),
-	CONTENT VARCHAR(16777216),
-	TOPIC_ID NUMBER(38,0),
-	ID NUMBER(38,0)
+	ID NUMBER(38,0),
+    TOPIC_ID NUMBER(38,0),
+    HEADING VARCHAR(16777216),
+	CONTENT VARCHAR(16777216)
+	
     );""".format(db,schema,content)
 
     execute(connection,contentTable)
@@ -128,8 +129,8 @@ def createtables(connection,db,topic,content,metadata,urldata):
 def loadtable_s3(connection, db,urldata,metadata,content,topic):
     print("................LOADING DATA FROM SNOWFLAKE TO S3")
     schema = os.getenv("SNOWFLAKE_DBT_SCHEMA")
-    aws_access = os.getenv("access_key")
-    aws_secret = os.getenv("secret_key")
+    aws_access = os.getenv("S3_ACCESS_KEY")
+    aws_secret = os.getenv("S3_SECRET_KEY")
     
     urldataload = """copy into {}.{}.{}
     from 's3://cfa-pdfs/clean_csv_data/FinanceHub.csv'

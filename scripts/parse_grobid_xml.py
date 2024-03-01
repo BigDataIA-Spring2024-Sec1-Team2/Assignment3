@@ -1,13 +1,10 @@
 import os
 import sys
-import requests
 from dotenv import load_dotenv
 from grobid_client.grobid_client import GrobidClient
 from bs4 import BeautifulSoup
 from pydantic import TypeAdapter, ValidationError
-import csv
-import json
-import dataclasses
+import boto3
 
 ## config
 print("PYTHONPATH = ",sys.path)
@@ -19,21 +16,20 @@ sys.path.append(os.getcwd())
 from models.content_pdf import ContenPDF
 from models.topic_pdf import TopicPDF
 from models.metadata import MetadataPDF
-from utility_s3 import download_files_from_s3
+from utility import Utility
 
 
-load_dotenv('.env',override=True)
 
-def load_env():
-    grobid_url = os.getenv("GROBID_URL")
-    pdf_directory = os.getenv("PDF_DIR_PATH") # Store the downloaded PDF files from S3
+def load_parsing_env():
+    load_dotenv('./config/.env',override=True)
+
     output_dir = os.getenv("OUTPUT_DIR_PATH") # Store the extracted txt files
     s3_bucket_name = os.getenv("S3_BUCKET_NAME")
     access_key = os.getenv("S3_ACCESS_KEY")
     secret_key = os.getenv("S3_SECRET_KEY")
     region = os.getenv("S3_REGION")
     
-    return grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region
+    return output_dir, s3_bucket_name, access_key, secret_key, region
 
 # Function to extract grobid xml using grobid client
 def extract_grobid(output_dir):
@@ -45,7 +41,7 @@ def extract_grobid(output_dir):
         client = GrobidClient(config_path="./config.json")
         client.process("processFulltextDocument", "../data",
                     output=output_path, consolidate_citations=True, tei_coordinates=True, force=True)
-        print("Done")
+        print("Done extracting xml files from GROBID")
         
     except Exception as e:
         print("Failed to extract pdf using grobid with error:")
@@ -55,34 +51,6 @@ def extract_grobid(output_dir):
         print("Changing current working directory back to:")
         print(os.getcwd())
 
-def dump_to_s3():
-    pass
-
-# utility function to store the given list as csv to given file path
-def store_to_csv(object_list, file_dir, file_name):
-    # Ensure the list is not empty
-    if object_list:
-        # Get attribute names from the first object
-        fieldnames = list(vars(object_list[0]).keys())
-        # fieldnames = [field.name for field in fields(Person)]
-
-        # Check if the directory exists, create it if not
-        if not os.path.exists(file_dir):
-            print("Creating directory to store csv")
-            os.makedirs(file_dir)
-
-        csv_file_path = os.path.join(file_dir, file_name)
-
-        with open(csv_file_path, mode='w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-            writer.writeheader()
-
-            for object in object_list:
-                writer.writerow({field: getattr(object, field) for field in fieldnames})
-
-        print(f'Data has been written to {csv_file_path}.')
-    else:
-        print("List is empty, nothing to write to CSV.")
 
 # function to parse individual grobid xml and create ContentPDF and TopicPDF objects
 def parse_xml_content(level, xml_file_path):
@@ -144,6 +112,7 @@ def parse_xml_content(level, xml_file_path):
             content_model = TypeAdapter(ContenPDF).validate_python(cont)
             content_list.append(content_model)
         except ValidationError as e:
+            print("VALIDATION ERROR OCCURRED")
             print(e)
             print("Skipping this content : ")
             print(div.text)
@@ -152,7 +121,7 @@ def parse_xml_content(level, xml_file_path):
     return topic_list, content_list, content_length
 
 # function to parse all xml files in the local directory and create MetadataPDF class
-def parse_all_xml(s3_paths):
+def parse_all_xml(s3_paths, output_dir):
     # Iterate through all PDF files in the directory
     grobid_output_dir = output_dir+"grobid/"
     topic_list,content_list = [], []
@@ -176,8 +145,6 @@ def parse_all_xml(s3_paths):
             topic_names = [top.topic for top in topics]
             sub_topics_names = [st.heading for st in contents]
             s3_path = [p for p in s3_paths if level in p]
-            print("s3 file path")
-            print(s3_path)
 
             metadata = MetadataPDF(name=name, level=levell, year=year, total_topics=total_topics,
                                    topics=topic_names, total_sub_topics=total_sub_topics, 
@@ -188,15 +155,36 @@ def parse_all_xml(s3_paths):
             metadata_list.append(metadata_model)
             topic_list.append(topics)
             content_list.append(contents)
-            print(len(content_list))
-            print(len(topic_list))
+
     return metadata_list, topic_list, content_list
 
+def download_files_from_s3(local_folder, s3_folder, access_key, secret_key, region, s3_bucket_name):
+    s3 = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key, region_name = region)
+
+    # List objects in the specified S3 folder
+    response = s3.list_objects_v2(Bucket=s3_bucket_name, Prefix=s3_folder)
+    # print(response)
+    file_paths = []
+
+    # Download each file to the local directory
+    for obj in response.get('Contents')[1:]:
+        key = obj['Key']
+        local_file_path = os.path.join(local_folder, os.path.basename(key))
+
+        s3.download_file(s3_bucket_name, key, local_file_path)
+        print(f"Downloaded: {key} to {local_file_path}")
+        path = f"https://{s3_bucket_name}.s3.amazonaws.com/{key}"
+        file_paths.append(path)
+
+    print(file_paths)
+    return file_paths
+
+
 # driver function
-if __name__ == '__main__': 
+def perform_grobid_extraction(): 
 
     # load env
-    grobid_url, pdf_directory, output_dir, s3_bucket_name, access_key, secret_key, region = load_env() 
+    output_dir, s3_bucket_name, access_key, secret_key, region = load_parsing_env() 
 
     if not os.path.exists("output_data/"):
         print("Creating directory to store output data")
@@ -205,26 +193,28 @@ if __name__ == '__main__':
     if not os.path.exists("data/"):
         print("Creating directory to store raw pdfs")
         os.makedirs("data/")
-        
+
     # download the pdf files from s3
-    s3_paths = download_files_from_s3("data/", "raw_pdfs")
+    s3_paths = download_files_from_s3("data/", "raw_pdfs", access_key, secret_key, region, s3_bucket_name)
+
     # extract grobid xml from PDF
     extract_grobid(output_dir)
+
     # parse the xmls and validate objs using pydantic
-    metadata_list,topic_list,content_list = parse_all_xml(s3_paths)
+    metadata_list,topic_list,content_list = parse_all_xml(s3_paths, output_dir)
+
     # store the objects to csv
     csv_output_dir = f'{output_dir}cleaned_csv/'
-    store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
+    Utility.store_to_csv(metadata_list, csv_output_dir, "MetadataPDF.csv")
 
     # flatten the lists before storing it to csv
     topic_flattened = [topic for row in topic_list for topic in row]
-    store_to_csv(topic_flattened, csv_output_dir, "TopicPDF.csv")
+    Utility.store_to_csv(topic_flattened, csv_output_dir, "TopicPDF.csv")
 
     content_flattened = [content for row in content_list for content in row]
-    store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
+    Utility.store_to_csv(content_flattened, csv_output_dir, "ContentPDF.csv")
 
 
-       
 
 
     
