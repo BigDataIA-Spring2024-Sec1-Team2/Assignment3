@@ -1,7 +1,7 @@
 version: 2
 
 models:
-  - name: my_model
+  - name: cfa_model
     description: Model representing final data
     columns:
       - name: YEAR
@@ -16,7 +16,7 @@ models:
         description: Parent Topic of CFA article
         tests:
           - not_null
-      - name: NUMBER OF ARTICLES
+      - name: NUMBER_OF_ARTICLES
         description: Total number of CFA articles under corresponding topic in corresponding year
       - name: MIN_SUMMARY
         description: Length of shortest Summary of CFA article
