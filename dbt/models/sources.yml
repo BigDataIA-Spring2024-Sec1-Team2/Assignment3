@@ -2,11 +2,9 @@ version: 2
 
 sources:
     - name: my_new_project
-      description: This is a dbt project for DAMG 7245 Course
+      description: This is a dbt project for managing CFA website data
       database: "{{ env_var('DBT_DATABASE') }}"
       schema: web_data
       tables:
           - name: urldata
-            description: data scraped from CFA Websites
-          # - name: orders
-          #   description: One record per order. Includes cancelled and deleted orders.
+            description: Data scraped from CFA Websites
