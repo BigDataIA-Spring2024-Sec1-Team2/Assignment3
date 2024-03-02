@@ -10,7 +10,7 @@
 
 # Finance Professional Development Resource Database
 
-Big Data Systems and Intelligence Analytics (DAMG 7245) 
+Big Data Systems and Intelligence Analytics (DAMG 7245)
 
 ## Overview
 
@@ -18,45 +18,55 @@ This project aims to aggregate and make accessible finance professional developm
 
 ## Live application Links
 
-[![codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=1_g3QZtY-Eae-6uYk91tGWhSfqPiM0bwwxelIrHwFKZY#0)
+[![codelabs](https://img.shields.io/badge/codelabs-4285F4?style=for-the-badge&logo=codelabs&logoColor=white)](https://codelabs-preview.appspot.com/?file_id=13MgE1pIwI1kbKHhhZf0IjBEvPTK-F1nJS3qvQEnQ76U)
 
 ## Problem Statement
 
-Part 1:
+### Part 1:
 
 In this segment, we will design 2 Python classes
 
 URLClass to represent the schema for the Assignment 2(Part 1) CFA webpages (224 pages). Each webpage needs to adhere to guidelines you define as a part of the URLClass
+
 Two PDFClasses to represent the schema for the Grobid output.
 MetaDataPDFClass : Stores metadata for the three PDF files
 ContentPDFClass: Stores the extracted content from each PDF file
 Notes:
 
 Use the provided schema for Part 1 and create schemas for Part 2. For Part 2 (PDFClass), start with creating the Snowflake schema and discuss the intuition of why you created the schema in the first place and what applications could use your schema.
+
 You are expected to do data and schema validation using these objects using Pydantic 2 (See the tutorials and attend the TA lab )and create “clean” csv files
+
 Build 5+5 test cases using Pytest for each of the three classes to show how your validation would succeed/fail (5 pass and 5 fail)
+
 You can use the Grobid data loader and Url data loader classes as starter code or the second example on Grobid Data classes to start with.
-Part 2 using DBT.
+
+### Part 2: using DBT
 
 Your team is reviewing the architecture of Part 1 and think using DBT with Snowflake to run transformation workflows.
 
-Review https://docs.getdbt.com/docs/introductionLinks to an external site. to understand  DBT
+Review [DBT Documentation](https://docs.getdbt.com/docs/introduction) to understand DBT
 
-Your plan is to redo the tutorial: https://docs.getdbt.com/guides/snowflake?step=7Links to an external site. but with the “clean csv” created in Part 1
+Your plan is to redo the tutorial: [DBT Snowflake Documentation](https://docs.getdbt.com/guides/snowflake?step=7) but with the “clean csv” created in Part 1
 
 Requirements
 
-Load the clean data into Snowflake
-You intend to create a summary table with the following schema using DBT.
-Level, Topic, Year, Number of articles, Min Length (Summary), Max Length (Summary), Min Length (Learning outcomes), Max Length (Learning outcomes)
-You are free to build a model in anyway you want
-Materialize it to a new table
-Write tests to validate the new columns
-Document your model
-Commit and Deploy the model
-Note: Review https://docs.getdbt.com/docs/dbt-cloud-environmentsLinks to an external site. for deployment
-Create a Test and Production Environment. (Note: Your Snowflake should also have a corresponding Test and Production db/tables.
-What considerations would you have for a test and Production environment? 
+- Load the clean data into Snowflake
+- You intend to create a summary table with the following schema using DBT - Level, Topic, Year, Number of articles, Min Length (Summary), Max Length (Summary), Min Length (Learning outcomes), Max Length (Learning outcomes)
+- You are free to build a model in anyway you want
+- Materialize it to a new table
+- Write tests to validate the new columns
+- Document your model
+- Commit and Deploy the model
+
+Note:
+
+- Review [DBT Documentation](https://docs.getdbt.com/docs/dbt-cloud-environments) for deployment
+  Create a Test and Production Environment.
+
+- Your Snowflake should also have a corresponding Test and Production db/tables.
+
+- What considerations would you have for a test and Production environment?
 
 ## Features
 
@@ -64,26 +74,34 @@ What considerations would you have for a test and Production environment?
 - **Data Structuring**: Organizes scraped data into a coherent structure suitable for database integration.
 - **Text Extraction**: Implements algorithms to extract text from PDF documents.
 - **Cloud Integration**: Utilizes AWS S3 for storage and Snowflake for database management.
+- **Schema Validation**: Utilizes Pydantic for schema/data validation
+- **Unit Testing**: Utilizes Pytest for testing
 
 ## Architecture Diagram
 
-![Architecture Diagram](image.png)
+![Architecture Diagram Part 1](images/architecture.png)
+![Architecture Diagram Part 1](images/dbt_Architecture.png)
 
 ## Technologies Used
 
 [![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/)
 [![Python](https://img.shields.io/badge/Python-FFD43B?style=for-the-badge&logo=python&logoColor=blue)](https://www.python.org/)
-[![Beautiful Soup](https://img.shields.io/badge/beautiful_soup-109989?style=for-the-badge&logo=beautiful_soup&logoColor=white)](https://pypi.org/project/beautifulsoup4/)
+[![Beautiful Soup](https://img.shields.io/badge/beautiful_soup-109989?style=for-the-badge&logo=python&logoColor=blue)](https://pypi.org/project/beautifulsoup4/)
 [![Selenium](https://img.shields.io/badge/Selenium-39e75f?style=for-the-badge&logo=selenium&logoColor=blue)](https://www.selenium.dev/)
-[![Grobid](https://img.shields.io/badge/grobid-909090?style=for-the-badge&logo=grobid&logoColor=blue)](https://grobid.readthedocs.io/en/latest/Introduction/)
-[![PyPDF2](https://img.shields.io/badge/PyPDF2-123499?style=for-the-badge&logo=python&logoColor=blue)](https://pypi.org/project/PyPDF2/)
+[![Grobid](https://img.shields.io/badge/grobid-909090?style=for-the-badge&logo=python&logoColor=blue)](https://grobid.readthedocs.io/en/latest/Introduction/)
+[![dbt Cloud](https://img.shields.io/badge/dbt%20Cloud-blue?style=for-the-badge&logo=dbt&logoColor=orange)](https://cloud.getdbt.com/)
 [![Snowflake](https://img.shields.io/badge/Snowflake-90e0ef?style=for-the-badge&logo=snowflake&logoColor=blue)](https://www.snowflake.com/en/)
-[![Amazon S3](https://img.shields.io/badge/Amazon_S3-FF4B4B?style=for-the-badge&logo=Amazon_S3&logoColor=white)](https://aws.amazon.com/s3/)
+[![Amazon S3](https://img.shields.io/badge/Amazon%20S3-lightblue?style=for-the-badge&logo=amazon-s3&logoColor=darkred)](https://aws.amazon.com/s3/)
+[![Pydantic](https://img.shields.io/badge/Pydantic-ffd54f?style=for-the-badge&logo=pydantic&logoColor=red)](https://aws.amazon.com/s3/)
+[![Pytest](https://img.shields.io/badge/Pytest-ab47bc?style=for-the-badge&logo=pytest&logoColor=blue)](https://aws.amazon.com/s3/)
 
 - Python for scripting and web scraping
 - Jupyter Notebook for data analysis and visualization
 - Snowflake for data storage and management
 - AWS S3 for cloud-based file storage
+- Pydantic for Data/Schema Validation
+- Pytest for testing
+- DBT Cloud for data transformation
 
 ## Data Sources
 
@@ -97,9 +115,79 @@ No specific prerequisites are required. Only installation of required packages n
 ## Project Structure
 
 ```
-📦 Assignment3
-
+├─ .gitignore
+├─ LICENSE
+├─ README.md
+├─ config.json
+├─ dbt
+│  ├─ analyses
+│  │  └─ .gitkeep
+│  ├─ dbt_project.yml
+│  ├─ macros
+│  │  └─ .gitkeep
+│  ├─ models
+│  │  ├─ cfa_model.sql
+│  │  ├─ schema.yml
+│  │  ├─ sources.yml
+│  │  ├─ stg_learning_outcomes.sql
+│  │  ├─ stg_summary.sql
+│  │  └─ stg_urldata.sql
+│  ├─ seeds
+│  │  └─ .gitkeep
+│  └─ snapshots
+│     └─ .gitkeep
+├─ diagram
+│  └─ Diagrams.ipynb
+├─ grobid_client_python
+├─ images
+│  ├─ 2.png
+│  ├─ 3.png
+│  ├─ 4.png
+│  ├─ API.png
+│  ├─ architecture.png
+│  ├─ brackets-coding-icon.png
+│  ├─ csv-file-icon.png
+│  ├─ dbt.jpg
+│  ├─ dbt_Architecture.png
+│  ├─ github.png
+│  ├─ prod.png
+│  ├─ pydantic.jpeg
+│  ├─ pypdf.png
+│  ├─ pytest.jpeg
+│  ├─ selenium.png
+│  ├─ soup.png
+│  ├─ test.png
+│  └─ txt-file-icon.png
+├─ models
+│  ├─ content_pdf.py
+│  ├─ metadata.py
+│  ├─ topic_pdf.py
+│  └─ urlClass.py
+├─ output_data
+│  ├─ cleaned_csv
+│  │  ├─ 224_links.txt
+│  │  ├─ ContentPDF.csv
+│  │  ├─ FinanceHub.csv
+│  │  ├─ MetadataPDF.csv
+│  │  └─ TopicPDF.csv
+│  └─ grobid
+│     ├─ 2024-l1-topics-combined-2.grobid.tei.xml
+│     ├─ 2024-l2-topics-combined-2.grobid.tei.xml
+│     └─ 2024-l3-topics-combined-2.grobid.tei.xml
+├─ scripts
+│  ├─ driver.py
+│  ├─ parse_grobid_xml.py
+│  ├─ snowflake_setup.py
+│  ├─ utility.py
+│  └─ web_scaping_url_dataset_creation.py
+└─ tests
+   ├─ test_content.py
+   ├─ test_metadata.py
+   ├─ test_topic.py
+   └─ test_urlClass.py
 ```
+
+©generated by [Project Tree Generator](https://woochanleee.github.io/project-tree-generator)
 
 _You can generate the project tree using following tools_
 _[Project Tree Generator](https://woochanleee.github.io/project-tree-generator)_
@@ -113,6 +201,7 @@ _[Generate from terminal](https://www.geeksforgeeks.org/tree-command-unixlinux/)
 2. Install the required Python libraries using `pip install -r requirements.txt`.
 3. Configure AWS S3 and Snowflake with the provided setup guide.
 4. Install selenium webdriver for edge browser - Download the edge webdriver file and set the Path in environment variables
+5. Configure repository on github with DBT cloud account and connect the snowflake environment with DBT to access the required tables.
 
 Naming Conventions:
 
@@ -120,8 +209,10 @@ Naming Conventions:
 - snowflake DB: DAMG_7245_CFA
 - snowflake warehouse: DAMG_7245_CFA
 - Tables:
-  - metadata: CFA_META_R
-  - web scraped data: CFA_WEB_DATA_R
+  - metadata: METADATA
+  - web scraped data: URLDATA
+  - contents: CONTENTS
+  - topic: TOPICS
 
 Execution Step for code/CSV2Snowflake.ipynb
 
@@ -155,3 +246,8 @@ S3_META_SECRET_KEY = ''
 - [Snowflake Documentation](https://docs.snowflake.com/en/)
 - [Grobid Documentation](https://grobid.readthedocs.io/en/latest/Introduction/)
 - [CFA Institute's Website](https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#sort=%40refreadingcurriculumyear%20descending)
+- [CFA Institute's Website](https://www.cfainstitute.org/en/membership/professional-development/refresher-readings#sort=%40refreadingcurriculumyear%20descending)
+- [Pydantic Documentation](https://docs.pydantic.dev/latest/)
+- [Pytest Documentation](https://docs.pytest.org/en/7.1.x/contents.html)
+- [DBT Documentation](https://docs.getdbt.com/docs/collaborate/documentation)
+- [DBT Snowflake Documentation](https://docs.getdbt.com/guides/snowflake)
