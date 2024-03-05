@@ -38,7 +38,7 @@ This project aims to aggregate and make accessible finance institute related mat
 - Review [DBT Documentation](https://docs.getdbt.com/docs/introduction) to understand DBT
 - Implement following steps [DBT Snowflake Documentation](https://docs.getdbt.com/guides/snowflake?step=7) on the data stored in snowflake tables
 
-Requirements
+### Requirements:
 
 - Load the clean data into Snowflake
 - Create Test and Production DB/Tables in Snowflake
